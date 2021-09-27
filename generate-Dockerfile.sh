@@ -34,6 +34,7 @@ while [[ $# -gt 0 ]]; do
     --pytorch-notebook) pytorch_notebook=1 ;;
     --gpu) GPU=1 ;;
     --zhfonts) zhfonts=1 ;;
+    --opencv) opencv=1 ;;
     --tensorboard) tensorboard=1 ;;
     -h | --help) HELP=1 ;;
     *) echo "Unknown parameter passed: $1" && HELP=1 ;;
@@ -230,6 +231,15 @@ if [[ $zhfonts ]]; then
 ############################################################################
 " >>$DOCKERFILE
   cat src/Dockerfile.zhfonts >>$DOCKERFILE
+fi
+
+if [[ $opencv ]]; then
+  echo "
+############################################################################
+########################## Dependency: opencv ##############################
+############################################################################
+" >>$DOCKERFILE
+  cat src/Dockerfile.opencv >>$DOCKERFILE
 fi
 
 if [[ ! $base_notebook ]]; then
