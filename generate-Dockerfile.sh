@@ -251,6 +251,7 @@ if [[ ! $base_notebook ]]; then
     echo "ARG TENSORFLOW_VERSION=${TENSORFLOW}" >>$DOCKERFILE
     if [[ $CUDA ]]; then
       echo "ARG TENSORFLOW_PREFIX=-gpu" >>$DOCKERFILE
+      echo "ENV TF_FORCE_GPU_ALLOW_GROWTH=true" >>$DOCKERFILE
     fi
     cat src/Dockerfile.tensorflow >>$DOCKERFILE
     tensorboard=1
