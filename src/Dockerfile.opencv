@@ -1,0 +1,10 @@
+USER root
+
+RUN apt-get update && apt-get install -yq --no-install-recommends \
+    freeglut3-dev \
+    libgtk2.0-dev \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
+
+USER ${NB_UID}
+
+RUN pip install --no-cache-dir opencv-python
