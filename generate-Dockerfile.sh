@@ -29,6 +29,7 @@ while [[ $# -gt 0 ]]; do
       PYTORCH="$2"
       shift
       ;;
+    --generate-tag) generate_tag=1 ;;
     --base-notebook) base_notebook=1 ;;
     --tensorflow-notebook) tensorflow_notebook=1 ;;
     --pytorch-notebook) pytorch_notebook=1 ;;
@@ -168,6 +169,23 @@ if [[ $GPU == 1 ]] || [[ $CUDA ]]; then
       exit 0
       ;;
   esac
+fi
+
+if [[ $generate_tag ]]; then
+  if [[ $tensorflow_notebook ]]; then
+    TAG=tensorflow-v${TENSORFLOW//\./-}
+  fi
+
+  if [[ $pytorch_notebook ]]; then
+    TAG=pytorch-v${PYTORCH//\./-}
+  fi
+
+  if [[ $CUDA ]]; then
+    TAG=${TAG}-gpu-cuda-${CUDA//\./-}
+  fi
+
+  echo $TAG
+  exit 0
 fi
 
 # Clone if docker-stacks doesn't exist, and set to the given commit or the default commit

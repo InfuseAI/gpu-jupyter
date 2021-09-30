@@ -7,8 +7,9 @@ jobs:
     steps:
       - checkout
       - run: |
-          export CI_DOCKER_TAG=base-${CIRCLE_SHA1:0:8}
           ./generate-Dockerfile.sh --base-notebook
+          export CI_DOCKER_TAG=${./generate-Dockerfile.sh --generate-tag --base-notebook}
+          export CI_DOCKER_TAG=${CI_DOCKER_TAG}-${CIRCLE_SHA1:0:8}
           docker login -u ${DOCKER_USER} -p ${DOCKER_PASS}
           docker build --build-arg PYTHON_VERSION=3.7 -t ${DOCKER_REGISTRY}/primehub-notebook:${CI_DOCKER_TAG} .build
           docker push ${DOCKER_REGISTRY}/primehub-notebook:${CI_DOCKER_TAG}
@@ -19,8 +20,9 @@ jobs:
     steps:
       - checkout
       - run: |
-          export CI_DOCKER_TAG=tensorflow-v2-6-0-${CIRCLE_SHA1:0:8}
           ./generate-Dockerfile.sh --tensorflow-notebook
+          export CI_DOCKER_TAG=${./generate-Dockerfile.sh --generate-tag --tensorflow-notebook}
+          export CI_DOCKER_TAG=${CI_DOCKER_TAG}-${CIRCLE_SHA1:0:8}
           docker login -u ${DOCKER_USER} -p ${DOCKER_PASS}
           docker build --build-arg PYTHON_VERSION=3.7 -t ${DOCKER_REGISTRY}/primehub-notebook:${CI_DOCKER_TAG} .build
           docker push ${DOCKER_REGISTRY}/primehub-notebook:${CI_DOCKER_TAG}
@@ -31,8 +33,9 @@ jobs:
     steps:
       - checkout
       - run: |
-          export CI_DOCKER_TAG=pytorch-v1-9-1-${CIRCLE_SHA1:0:8}
           ./generate-Dockerfile.sh --pytorch-notebook
+          export CI_DOCKER_TAG=${./generate-Dockerfile.sh --generate-tag --pytorch-notebook}
+          export CI_DOCKER_TAG=${CI_DOCKER_TAG}-${CIRCLE_SHA1:0:8}
           docker login -u ${DOCKER_USER} -p ${DOCKER_PASS}
           docker build --build-arg PYTHON_VERSION=3.7 -t ${DOCKER_REGISTRY}/primehub-notebook:${CI_DOCKER_TAG} .build
           docker push ${DOCKER_REGISTRY}/primehub-notebook:${CI_DOCKER_TAG}
@@ -43,8 +46,9 @@ jobs:
     steps:
       - checkout
       - run: |
-          export CI_DOCKER_TAG=tensorflow-v2-6-0-gpu-cuda-11-2${CIRCLE_SHA1:0:8}
           ./generate-Dockerfile.sh --tensorflow-notebook --gpu
+          export CI_DOCKER_TAG=${./generate-Dockerfile.sh --generate-tag --tensorflow-notebook --gpu}
+          export CI_DOCKER_TAG=${CI_DOCKER_TAG}-${CIRCLE_SHA1:0:8}
           docker login -u ${DOCKER_USER} -p ${DOCKER_PASS}
           docker build --build-arg PYTHON_VERSION=3.7 -t ${DOCKER_REGISTRY}/primehub-notebook:${CI_DOCKER_TAG} .build
           docker push ${DOCKER_REGISTRY}/primehub-notebook:${CI_DOCKER_TAG}
@@ -55,8 +59,9 @@ jobs:
     steps:
       - checkout
       - run: |
-          export CI_DOCKER_TAG=pytorch-v1-9-1-gpu-cuda-11-1-${CIRCLE_SHA1:0:8}
           ./generate-Dockerfile.sh --pytorch-notebook --gpu
+          export CI_DOCKER_TAG=${./generate-Dockerfile.sh --generate-tag --pytorch-notebook --gpu}
+          export CI_DOCKER_TAG=${CI_DOCKER_TAG}-${CIRCLE_SHA1:0:8}
           docker login -u ${DOCKER_USER} -p ${DOCKER_PASS}
           docker build --build-arg PYTHON_VERSION=3.7 -t ${DOCKER_REGISTRY}/primehub-notebook:${CI_DOCKER_TAG} .build
           docker push ${DOCKER_REGISTRY}/primehub-notebook:${CI_DOCKER_TAG}
