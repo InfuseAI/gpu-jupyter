@@ -5,7 +5,7 @@ version: 2.1
 # Define a job to be invoked later in a workflow.
 # See: https://circleci.com/docs/2.0/configuration-reference/#jobs
 jobs:
-  base-notebook:
+  build-base-notebook-cpu:
     # Specify the execution environment. You can specify an image from Dockerhub or use one of our Convenience Images from CircleCI's Developer Hub.
     # See: https://circleci.com/docs/2.0/configuration-reference/#docker-machine-macos-windows-executor
     docker:
@@ -14,13 +14,16 @@ jobs:
     # See: https://circleci.com/docs/2.0/configuration-reference/#steps
     steps:
       - checkout
-      - run: 
-          name: Generate Dockerfile
-          command: echo ${CIRCLE_SHA1:0:7} && ./generate-Dockerfile.sh --base-notebook && echo .build/Dockerfile
+      - run: |
+          export CI_DOCKER_TAG=base-${CIRCLE_SHA1:0:7}
+          ./generate-Dockerfile.sh --base-notebook
+          docker login -u $DOCKER_USER -p $DOCKER_PASS
+          docker build --build-arg PYTHON_VERSION=3.7 -t infuseai/primehub-notebook:${CI_DOCKER_TAG} .build
+          docker push infuseai/primehub-notebook:${CI_DOCKER_TAG}
 
 # Invoke jobs via workflows
 # See: https://circleci.com/docs/2.0/configuration-reference/#workflows
 workflows:
-  cpu-notebooks:
+  build-cpu-notebooks:
     jobs:
-      - base-notebook
+      - build-base-notebook-cpu
