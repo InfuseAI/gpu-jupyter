@@ -1,70 +1,58 @@
 version: 2.1
 
+commands:
+  build-and-push:
+    description: "Generate Dockerfile, then build and push the image"
+    parameters:
+      args:
+        type: string
+    steps:
+      - checkout
+      - run: |
+          ./generate-Dockerfile.sh << parameters.args >>
+          export CI_DOCKER_TAG=$(./generate-Dockerfile.sh --generate-tag << parameters.args >>)
+          export CI_DOCKER_TAG=${CI_DOCKER_TAG}-${CIRCLE_SHA1:0:8}
+          docker login -u ${DOCKER_USER} -p ${DOCKER_PASS}
+          docker build --build-arg PYTHON_VERSION=3.7 -t ${DOCKER_REGISTRY}/primehub-notebook:${CI_DOCKER_TAG} .build
+          docker push ${DOCKER_REGISTRY}/primehub-notebook:${CI_DOCKER_TAG}
+  
+
 jobs:
   build-base-notebook-cpu:
     machine:
       docker_layer_caching: true
     steps:
-      - checkout
-      - run: |
-          ./generate-Dockerfile.sh --base-notebook
-          export CI_DOCKER_TAG=$(./generate-Dockerfile.sh --generate-tag --base-notebook)
-          export CI_DOCKER_TAG=${CI_DOCKER_TAG}-${CIRCLE_SHA1:0:8}
-          docker login -u ${DOCKER_USER} -p ${DOCKER_PASS}
-          docker build --build-arg PYTHON_VERSION=3.7 -t ${DOCKER_REGISTRY}/primehub-notebook:${CI_DOCKER_TAG} .build
-          docker push ${DOCKER_REGISTRY}/primehub-notebook:${CI_DOCKER_TAG}
+      - build-and-push:
+          args: "--base-notebook"
 
   build-tensorflow-notebook-cpu:
     machine:
       docker_layer_caching: true
     steps:
-      - checkout
-      - run: |
-          ./generate-Dockerfile.sh --tensorflow-notebook
-          export CI_DOCKER_TAG=$(./generate-Dockerfile.sh --generate-tag --tensorflow-notebook)
-          export CI_DOCKER_TAG=${CI_DOCKER_TAG}-${CIRCLE_SHA1:0:8}
-          docker login -u ${DOCKER_USER} -p ${DOCKER_PASS}
-          docker build --build-arg PYTHON_VERSION=3.7 -t ${DOCKER_REGISTRY}/primehub-notebook:${CI_DOCKER_TAG} .build
-          docker push ${DOCKER_REGISTRY}/primehub-notebook:${CI_DOCKER_TAG}
+      - build-and-push:
+          args: "--tensorflow-notebook"
 
   build-pytorch-notebook-cpu:
     machine:
       docker_layer_caching: true
     steps:
-      - checkout
-      - run: |
-          ./generate-Dockerfile.sh --pytorch-notebook
-          export CI_DOCKER_TAG=$(./generate-Dockerfile.sh --generate-tag --pytorch-notebook)
-          export CI_DOCKER_TAG=${CI_DOCKER_TAG}-${CIRCLE_SHA1:0:8}
-          docker login -u ${DOCKER_USER} -p ${DOCKER_PASS}
-          docker build --build-arg PYTHON_VERSION=3.7 -t ${DOCKER_REGISTRY}/primehub-notebook:${CI_DOCKER_TAG} .build
-          docker push ${DOCKER_REGISTRY}/primehub-notebook:${CI_DOCKER_TAG}
+      - build-and-push:
+          args: "--pytorch-notebook"
 
   build-tensorflow-notebook-gpu:
     machine:
       docker_layer_caching: true
     steps:
-      - checkout
-      - run: |
-          ./generate-Dockerfile.sh --tensorflow-notebook --gpu
-          export CI_DOCKER_TAG=$(./generate-Dockerfile.sh --generate-tag --tensorflow-notebook --gpu)
-          export CI_DOCKER_TAG=${CI_DOCKER_TAG}-${CIRCLE_SHA1:0:8}
-          docker login -u ${DOCKER_USER} -p ${DOCKER_PASS}
-          docker build --build-arg PYTHON_VERSION=3.7 -t ${DOCKER_REGISTRY}/primehub-notebook:${CI_DOCKER_TAG} .build
-          docker push ${DOCKER_REGISTRY}/primehub-notebook:${CI_DOCKER_TAG}
+      - build-and-push:
+          args: "--tensorflow-notebook --gpu"
 
   build-pytorch-notebook-gpu:
     machine:
       docker_layer_caching: true
     steps:
-      - checkout
-      - run: |
-          ./generate-Dockerfile.sh --pytorch-notebook --gpu
-          export CI_DOCKER_TAG=$(./generate-Dockerfile.sh --generate-tag --pytorch-notebook --gpu)
-          export CI_DOCKER_TAG=${CI_DOCKER_TAG}-${CIRCLE_SHA1:0:8}
-          docker login -u ${DOCKER_USER} -p ${DOCKER_PASS}
-          docker build --build-arg PYTHON_VERSION=3.7 -t ${DOCKER_REGISTRY}/primehub-notebook:${CI_DOCKER_TAG} .build
-          docker push ${DOCKER_REGISTRY}/primehub-notebook:${CI_DOCKER_TAG}
+      - build-and-push:
+          args: "--pytorch-notebook --gpu"
+
 
 workflows:
   build-cpu-notebooks:
