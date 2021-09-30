@@ -172,6 +172,10 @@ if [[ $GPU == 1 ]] || [[ $CUDA ]]; then
 fi
 
 if [[ $generate_tag ]]; then
+  if [[ $base_notebook ]]; then
+    TAG="base"
+  fi
+
   if [[ $tensorflow_notebook ]]; then
     TAG=tensorflow-v${TENSORFLOW//\./-}
   fi
