@@ -14,9 +14,9 @@ jobs:
       - run: |
           export CI_DOCKER_TAG=base-${CIRCLE_SHA1:0:7}
           ./generate-Dockerfile.sh --base-notebook
-          docker login -u $DOCKER_USER -p $DOCKER_PASS
-          docker build --build-arg PYTHON_VERSION=3.7 -t infuseai/primehub-notebook:${CI_DOCKER_TAG} .build
-          docker push infuseai/primehub-notebook:${CI_DOCKER_TAG}
+          docker login -u ${DOCKER_USER} -p ${DOCKER_PASS}
+          docker build --build-arg PYTHON_VERSION=3.7 -t ${DOCKER_REGISTRY}/primehub-notebook:${CI_DOCKER_TAG} .build
+          docker push ${DOCKER_REGISTRY}/primehub-notebook:${CI_DOCKER_TAG}
 
 # Invoke jobs via workflows
 # See: https://circleci.com/docs/2.0/configuration-reference/#workflows
