@@ -1,15 +1,9 @@
-# Use the latest 2.1 version of CircleCI pipeline process engine.
-# See: https://circleci.com/docs/2.0/configuration-reference
 version: 2.1
 
-# Define a job to be invoked later in a workflow.
-# See: https://circleci.com/docs/2.0/configuration-reference/#jobs
 jobs:
   build-base-notebook-cpu:
     machine:
       docker_layer_caching: true
-    # Add steps to the job
-    # See: https://circleci.com/docs/2.0/configuration-reference/#steps
     steps:
       - checkout
       - run: |
@@ -22,8 +16,6 @@ jobs:
   build-tensorflow-notebook-cpu:
     machine:
       docker_layer_caching: true
-    # Add steps to the job
-    # See: https://circleci.com/docs/2.0/configuration-reference/#steps
     steps:
       - checkout
       - run: |
@@ -36,22 +28,47 @@ jobs:
   build-pytorch-notebook-cpu:
     machine:
       docker_layer_caching: true
-    # Add steps to the job
-    # See: https://circleci.com/docs/2.0/configuration-reference/#steps
     steps:
       - checkout
       - run: |
-          export CI_DOCKER_TAG=pytorch-v1-9-0-${CIRCLE_SHA1:0:8}
+          export CI_DOCKER_TAG=pytorch-v1-9-1-${CIRCLE_SHA1:0:8}
           ./generate-Dockerfile.sh --pytorch-notebook
           docker login -u ${DOCKER_USER} -p ${DOCKER_PASS}
           docker build --build-arg PYTHON_VERSION=3.7 -t ${DOCKER_REGISTRY}/primehub-notebook:${CI_DOCKER_TAG} .build
           docker push ${DOCKER_REGISTRY}/primehub-notebook:${CI_DOCKER_TAG}
 
-# Invoke jobs via workflows
-# See: https://circleci.com/docs/2.0/configuration-reference/#workflows
+  build-tensorflow-notebook-gpu:
+    machine:
+      docker_layer_caching: true
+    steps:
+      - checkout
+      - run: |
+          export CI_DOCKER_TAG=tensorflow-v2-6-0-gpu-cuda-11-2${CIRCLE_SHA1:0:8}
+          ./generate-Dockerfile.sh --tensorflow-notebook --gpu
+          docker login -u ${DOCKER_USER} -p ${DOCKER_PASS}
+          docker build --build-arg PYTHON_VERSION=3.7 -t ${DOCKER_REGISTRY}/primehub-notebook:${CI_DOCKER_TAG} .build
+          docker push ${DOCKER_REGISTRY}/primehub-notebook:${CI_DOCKER_TAG}
+
+  build-pytorch-notebook-gpu:
+    machine:
+      docker_layer_caching: true
+    steps:
+      - checkout
+      - run: |
+          export CI_DOCKER_TAG=pytorch-v1-9-1-gpu-cuda-11-1-${CIRCLE_SHA1:0:8}
+          ./generate-Dockerfile.sh --pytorch-notebook --gpu
+          docker login -u ${DOCKER_USER} -p ${DOCKER_PASS}
+          docker build --build-arg PYTHON_VERSION=3.7 -t ${DOCKER_REGISTRY}/primehub-notebook:${CI_DOCKER_TAG} .build
+          docker push ${DOCKER_REGISTRY}/primehub-notebook:${CI_DOCKER_TAG}
+
 workflows:
   build-cpu-notebooks:
     jobs:
       - build-base-notebook-cpu
       - build-tensorflow-notebook-cpu
       - build-pytorch-notebook-cpu
+
+  build-gpu-notebooks:
+    jobs:
+      - build-tensorflow-notebook-gpu
+      - build-pytorch-notebook-gpu
