@@ -1,26 +1,67 @@
-# Use the latest 2.1 version of CircleCI pipeline process engine.
-# See: https://circleci.com/docs/2.0/configuration-reference
 version: 2.1
 
-# Define a job to be invoked later in a workflow.
-# See: https://circleci.com/docs/2.0/configuration-reference/#jobs
-jobs:
-  base-notebook:
-    # Specify the execution environment. You can specify an image from Dockerhub or use one of our Convenience Images from CircleCI's Developer Hub.
-    # See: https://circleci.com/docs/2.0/configuration-reference/#docker-machine-macos-windows-executor
-    docker:
-      - image: cimg/base:stable
-    # Add steps to the job
-    # See: https://circleci.com/docs/2.0/configuration-reference/#steps
+commands:
+  build-and-push:
+    description: "Generate Dockerfile, then build and push the image"
+    parameters:
+      args:
+        type: string
     steps:
       - checkout
-      - run: 
-          name: Generate Dockerfile
-          command: echo ${CIRCLE_SHA1:0:7} && ./generate-Dockerfile.sh --base-notebook && echo .build/Dockerfile
+      - run: |
+          ./generate-Dockerfile.sh << parameters.args >>
+          export CI_DOCKER_TAG=$(./generate-Dockerfile.sh --generate-tag << parameters.args >>)
+          export CI_DOCKER_TAG=${CI_DOCKER_TAG}-${CIRCLE_SHA1:0:8}
+          docker login -u ${DOCKER_USER} -p ${DOCKER_PASS}
+          docker build --build-arg PYTHON_VERSION=3.7 -t ${DOCKER_REGISTRY}/primehub-notebook:${CI_DOCKER_TAG} .build
+          docker push ${DOCKER_REGISTRY}/primehub-notebook:${CI_DOCKER_TAG}
+  
 
-# Invoke jobs via workflows
-# See: https://circleci.com/docs/2.0/configuration-reference/#workflows
+jobs:
+  build-base-notebook-cpu:
+    machine:
+      docker_layer_caching: true
+    steps:
+      - build-and-push:
+          args: "--base-notebook"
+
+  build-tensorflow-notebook-cpu:
+    machine:
+      docker_layer_caching: true
+    steps:
+      - build-and-push:
+          args: "--tensorflow-notebook"
+
+  build-pytorch-notebook-cpu:
+    machine:
+      docker_layer_caching: true
+    steps:
+      - build-and-push:
+          args: "--pytorch-notebook"
+
+  build-tensorflow-notebook-gpu:
+    machine:
+      docker_layer_caching: true
+    steps:
+      - build-and-push:
+          args: "--tensorflow-notebook --gpu"
+
+  build-pytorch-notebook-gpu:
+    machine:
+      docker_layer_caching: true
+    steps:
+      - build-and-push:
+          args: "--pytorch-notebook --gpu"
+
+
 workflows:
-  cpu-notebooks:
+  build-cpu-notebooks:
     jobs:
-      - base-notebook
+      - build-base-notebook-cpu
+      - build-tensorflow-notebook-cpu
+      - build-pytorch-notebook-cpu
+
+  build-gpu-notebooks:
+    jobs:
+      - build-tensorflow-notebook-gpu
+      - build-pytorch-notebook-gpu
