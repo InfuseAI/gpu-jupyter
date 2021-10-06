@@ -2,11 +2,12 @@ version: 2.1
 
 commands:
   check-changed-files-or-halt:
-  parameters:
-    pattern:
-      type: string
-  steps:
-    - run: git show -m HEAD --name-only --pretty="" | egrep -q '<< parameters.pattern >>' || circleci-agent step halt
+    description: "Check changed files and half if target files are not changed"
+    parameters:
+      pattern:
+        type: string
+    steps:
+      - run: git show -m HEAD --name-only --pretty="" | egrep -q '<< parameters.pattern >>' || circleci-agent step halt
 
   build-and-push:
     description: "Generate Dockerfile, then build and push the image"
