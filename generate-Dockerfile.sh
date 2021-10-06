@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 cd $(cd -P -- "$(dirname -- "$0")" && pwd -P)
 
+# Import checkers
+source checker/*.sh
+
 # Set the path of the generated Dockerfile
 export DOCKERFILE=".build/Dockerfile"
 export STACKS_DIR=".build/docker-stacks"
@@ -59,11 +62,11 @@ UBUNTU_20_04_HEAD_COMMIT="310edebfdcff1ed58444b88fc0f7c513751e30bd"
 UBUNTU_18_04_HEAD_COMMIT="3fe198a1fd4625d833654b1112cb15fade47c2c1"
 
 if [[ ! $TENSORFLOW ]] && [[ $tensorflow_notebook ]]; then
-  TENSORFLOW="2.6.0"
+  TENSORFLOW=$TENSORFLOW_LATEST
 fi
 
 if [[ ! $PYTORCH ]] && [[ $pytorch_notebook ]]; then
-  PYTORCH="1.9.1"
+  PYTORCH=$PYTORCH_LATEST
 fi
 
 ROOT_CONTAINER="ubuntu:focal"
@@ -72,55 +75,15 @@ if [[ $GPU == 1 ]] || [[ $CUDA ]]; then
   GPU=1
 
   if [[ $TENSORFLOW ]]; then
-    case $TENSORFLOW in
-      "2.6.0")
-        REQUIRED_CUDA=("11.2")
-        ;;
-      "2.5.1" | "2.5.0")
-        REQUIRED_CUDA=("11.2")
-        ;;
-      "2.4.3" | "2.4.2" | "2.4.1" | "2.4.0")
-        REQUIRED_CUDA=("11.0")
-        ;;
-      "2.3.4" | "2.3.3" | "2.3.2" | "2.3.1" | "2.3.0")
-        REQUIRED_CUDA=("10.1")
-        ;;
-      "2.2.3" | "2.2.2" | "2.2.1" | "2.2.0")
-        REQUIRED_CUDA=("10.1")
-        ;;
-      "2.1.4" | "2.1.3" | "2.1.2" | "2.1.1" | "2.1.0")
-        REQUIRED_CUDA=("10.1")
-        ;;
-      "2.0.4" | "2.0.3" | "2.0.2" | "2.0.1" | "2.0.0")
-        REQUIRED_CUDA=("10.0")
-        ;;
-      "1.15.5" | "1.15.4" | "1.15.3" | "1.15.2" | "1.15.1" | "1.15.0")
-        REQUIRED_CUDA=("10.0")
-        ;;
-      *)
-        echo "TensorFlow $TENSORFLOW is not supported"
-        exit 0
-        ;;
-    esac
+    REQUIRED_CUDA=$(tensorflow_required_cuda $TENSORFLOW)
   fi
 
   if [[ $PYTORCH ]]; then
-    case $PYTORCH in
-      "1.9.1" | "1.9.0" | "1.8.0")
-        REQUIRED_CUDA=("11.1" "10.2")
-        ;;
-      "1.7.1")
-        REQUIRED_CUDA=("11.0" "10.2" "10.1" "9.2")
-        ;;
-      "1.7.0" | "1.6.0" | "1.5.1" | "1.5.0")
-        REQUIRED_CUDA=("10.2" "10.1" "9.2")
-        ;;
-      *)
-        echo "PyTorch $PYTORCH is not supported"
-        exit 0
-        ;;
-    esac
+    REQUIRED_CUDA=$(pytorch_required_cuda $PYTORCH)
   fi
+
+  # turn into array
+  REQUIRED_CUDA=($REQUIRED_CUDA)
 
   if [[ $REQUIRED_CUDA ]]; then
     if [[ $CUDA ]]; then
@@ -132,43 +95,10 @@ if [[ $GPU == 1 ]] || [[ $CUDA ]]; then
       CUDA=$REQUIRED_CUDA
     fi
   else
-    CUDA="11.2"
+    CUDA=$CUDA_LATEST
   fi
 
-  case $CUDA in
-    "11.2")
-      ROOT_CONTAINER="nvidia/cuda:11.2.2-cudnn8-runtime-ubuntu20.04"
-      export HEAD_COMMIT=$UBUNTU_20_04_HEAD_COMMIT
-      ;;
-    "11.1")
-      ROOT_CONTAINER="nvidia/cuda:11.1.1-cudnn8-runtime-ubuntu20.04"
-      export HEAD_COMMIT=$UBUNTU_20_04_HEAD_COMMIT
-      ;;
-    "11.0")
-      ROOT_CONTAINER="nvidia/cuda:11.0.3-cudnn8-runtime-ubuntu20.04"
-      export HEAD_COMMIT=$UBUNTU_20_04_HEAD_COMMIT
-      ;;
-    "10.2")
-      ROOT_CONTAINER="nvidia/cuda:10.2-cudnn7-runtime-ubuntu18.04"
-      export HEAD_COMMIT=$UBUNTU_18_04_HEAD_COMMIT
-      ;;
-    "10.1")
-      ROOT_CONTAINER="nvidia/cuda:10.1-cudnn7-runtime-ubuntu18.04"
-      export HEAD_COMMIT=$UBUNTU_18_04_HEAD_COMMIT
-      ;;
-    "10.0")
-      ROOT_CONTAINER="nvidia/cuda:10.0-cudnn7-runtime-ubuntu18.04"
-      export HEAD_COMMIT=$UBUNTU_18_04_HEAD_COMMIT
-      ;;
-    "9.2")
-      ROOT_CONTAINER="nvidia/cuda:9.2-cudnn7-runtime-ubuntu18.04"
-      export HEAD_COMMIT=$UBUNTU_18_04_HEAD_COMMIT
-      ;;
-    *)
-      echo "CUDA $CUDA is not supported"
-      exit 0
-      ;;
-  esac
+  ROOT_CONTAINER=$(cuda_root_container $CUDA)
 fi
 
 if [[ $generate_tag ]]; then
