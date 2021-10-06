@@ -7,6 +7,7 @@ commands:
       pattern:
         type: string
     steps:
+      - checkout
       - run: git show -m HEAD --name-only --pretty="" | egrep -q '<< parameters.pattern >>' || circleci-agent step halt
 
   build-and-push:
@@ -15,7 +16,6 @@ commands:
       args:
         type: string
     steps:
-      - checkout
       - run: |
           ./generate-Dockerfile.sh << parameters.args >>
           export CI_DOCKER_TAG=$(./generate-Dockerfile.sh --generate-tag << parameters.args >>)
