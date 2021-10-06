@@ -1,6 +1,13 @@
 version: 2.1
 
 commands:
+  check-changed-files-or-halt:
+  parameters:
+    pattern:
+      type: string
+  steps:
+    - run: git show -m HEAD --name-only --pretty="" | egrep -q '<< parameters.pattern >>' || circleci-agent step halt
+
   build-and-push:
     description: "Generate Dockerfile, then build and push the image"
     parameters:
@@ -22,6 +29,8 @@ jobs:
     machine:
       docker_layer_caching: true
     steps:
+      - check-changed-files-or-halt:
+        pattern: generate-Dockerfiles.sh|src/Dockerfile.(primehub|opencv)
       - build-and-push:
           args: "--base-notebook"
 
@@ -29,6 +38,8 @@ jobs:
     machine:
       docker_layer_caching: true
     steps:
+      - check-changed-files-or-halt:
+        pattern: generate-Dockerfiles.sh|src/Dockerfile.(primehub|opencv|tensorflow|tensorboard)
       - build-and-push:
           args: "--tensorflow-notebook"
 
@@ -36,6 +47,8 @@ jobs:
     machine:
       docker_layer_caching: true
     steps:
+      - check-changed-files-or-halt:
+        pattern: generate-Dockerfiles.sh|src/Dockerfile.(primehub|opencv|pytorch)
       - build-and-push:
           args: "--pytorch-notebook"
 
@@ -43,6 +56,8 @@ jobs:
     machine:
       docker_layer_caching: true
     steps:
+      - check-changed-files-or-halt:
+        pattern: generate-Dockerfiles.sh|src/Dockerfile.(primehub|opencv|tensorflow|tensorboard)
       - build-and-push:
           args: "--tensorflow-notebook --gpu"
 
@@ -50,6 +65,8 @@ jobs:
     machine:
       docker_layer_caching: true
     steps:
+      - check-changed-files-or-halt:
+        pattern: generate-Dockerfiles.sh|src/Dockerfile.(primehub|opencv|pytorch)
       - build-and-push:
           args: "--pytorch-notebook --gpu"
 
