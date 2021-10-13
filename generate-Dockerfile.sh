@@ -2,7 +2,9 @@
 cd $(cd -P -- "$(dirname -- "$0")" && pwd -P)
 
 # Import checkers
-source checker/*.sh
+for check in checker/*; do
+  source $check
+done
 
 # Set the path of the generated Dockerfile
 export DOCKERFILE=".build/Dockerfile"
