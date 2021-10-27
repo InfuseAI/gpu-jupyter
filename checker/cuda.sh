@@ -1,9 +1,13 @@
 #!/usr/bin/env bash
 
-export CUDA_LATEST="11.2"
+export CUDA_LATEST="11.3"
 
 cuda_root_container() {
   case $1 in
+    "11.3")
+      export HEAD_COMMIT=$UBUNTU_20_04_HEAD_COMMIT
+      echo "nvidia/cuda:11.3.1-cudnn8-runtime-ubuntu20.04"
+      ;;
     "11.2")
       export HEAD_COMMIT=$UBUNTU_20_04_HEAD_COMMIT
       echo "nvidia/cuda:11.2.2-cudnn8-runtime-ubuntu20.04"
