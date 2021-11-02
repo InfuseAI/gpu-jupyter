@@ -40,7 +40,7 @@ jobs:
       docker_layer_caching: true
     steps:
       - check-changed-files-or-halt:
-          pattern: generate-Dockerfiles.sh|src/Dockerfile.(primehub|opencv|tensorflow|tensorboard)
+          pattern: generate-Dockerfiles.sh|checker/tensorboard.sh|src/Dockerfile.(primehub|opencv|tensorflow|tensorboard)
       - build-and-push:
           args: "--tensorflow-notebook"
 
@@ -49,7 +49,7 @@ jobs:
       docker_layer_caching: true
     steps:
       - check-changed-files-or-halt:
-          pattern: generate-Dockerfiles.sh|src/Dockerfile.(primehub|opencv|pytorch)
+          pattern: generate-Dockerfiles.sh|checker/pytorch.sh|src/Dockerfile.(primehub|opencv|pytorch)
       - build-and-push:
           args: "--pytorch-notebook"
 
@@ -58,7 +58,7 @@ jobs:
       docker_layer_caching: true
     steps:
       - check-changed-files-or-halt:
-          pattern: generate-Dockerfiles.sh|src/Dockerfile.(primehub|opencv|tensorflow|tensorboard)
+          pattern: generate-Dockerfiles.sh|checker/(cuda|tensorflow).sh|src/Dockerfile.(primehub|opencv|tensorflow|tensorboard)
       - build-and-push:
           args: "--tensorflow-notebook --gpu"
 
@@ -67,7 +67,7 @@ jobs:
       docker_layer_caching: true
     steps:
       - check-changed-files-or-halt:
-          pattern: generate-Dockerfiles.sh|src/Dockerfile.(primehub|opencv|pytorch)
+          pattern: generate-Dockerfiles.sh|checker/(cuda|pytorch).sh|src/Dockerfile.(primehub|opencv|pytorch)
       - build-and-push:
           args: "--pytorch-notebook --gpu"
 
