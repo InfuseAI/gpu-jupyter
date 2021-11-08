@@ -1,9 +1,12 @@
 #!/usr/bin/env bash
 
-export TENSORFLOW_LATEST="2.6.1"
+export TENSORFLOW_LATEST="2.7.0"
 
 tensorflow_required_cuda() {
   case $1 in
+    "2.7.0")
+      echo "11.2"
+      ;;
     "2.6.1" | "2.6.0")
       echo "11.2"
       ;;
