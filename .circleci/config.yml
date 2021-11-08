@@ -40,7 +40,7 @@ jobs:
       docker_layer_caching: true
     steps:
       - check-changed-files-or-halt:
-          pattern: generate-Dockerfiles.sh|checker/tensorboard.sh|src/Dockerfile.(primehub|opencv|tensorflow|tensorboard)
+          pattern: generate-Dockerfiles.sh|checker/tensorflow.sh|src/Dockerfile.(primehub|opencv|tensorflow|tensorboard)
       - build-and-push:
           args: "--tensorflow-notebook"
 
